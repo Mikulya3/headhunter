@@ -3,4 +3,4 @@ from django.apps import AppConfig
 
 class AccountifyConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'accountify'
+    name = 'apps.accountify'

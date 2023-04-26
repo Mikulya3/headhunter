@@ -1,2 +1,8 @@
 django
 djangorestframework
+celery[redis]
+python-decouple
+dj_database_url
+djangorestframework-simplejwt
+psycopg2-binary
+drf-yasg
