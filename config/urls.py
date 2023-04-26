@@ -38,7 +38,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('swagger/', schema_view.with_ui('swagger')),
 
-    path('account/', include('apps.accountify.urls'))
+    path('account/', include('apps.accountify.urls')),
+    path('profile/', include('apps.userprofile.urls')),
 ]
 
 urlpatterns += static(
