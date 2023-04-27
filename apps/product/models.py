@@ -1,3 +1,4 @@
+
 from django.db import models
 
 # Create your models here.
@@ -17,6 +18,9 @@ class Resume(models.Model):
     class Meta:
         ordering = ['-updated_at']
 
+    def __str__(self):
+        return self.name
+
 
 class Job(models.Model):
     title = models.CharField(max_length=255)
@@ -30,3 +34,6 @@ class Job(models.Model):
 
     class Meta:
         ordering = ['-updated_at']
+
+    def __str__(self):
+        return self.title
