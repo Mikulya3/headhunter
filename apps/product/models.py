@@ -42,6 +42,35 @@ class Company(models.Model):
         return self.name
 
 
+class Specialization(models.Model):
+    name = models.CharField(max_length=128)
+    description = models.TextField()
+    keywords = models.TextField()
+
+    def __str__(self):
+        return self.name
+
+
+class SpecializationType(models.Model):
+    name = models.CharField(max_length=128)
+    specialization = models.ForeignKey(Specialization, on_delete=models.CASCADE, related_name='sp_types')
+    description = models.TextField()
+    keywords = models.TextField()
+
+    def __str__(self):
+        return f'{self.specialization.name}: {self.name}'
+
+
+class SpecializationSubType(models.Model):
+    name = models.CharField(max_length=128)
+    specialization_type = models.ForeignKey(SpecializationType, on_delete=models.CASCADE, related_name='sps_type')
+    description = models.TextField()
+    keywords = models.TextField()
+
+    def __str__(self):
+        return f'{self.specialization_type.specialization.name} > {self.specialization_type.name} > {self.name}'
+
+
 class Vacancy(models.Model):
     title = models.CharField(max_length=255)
     company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='companies')
@@ -51,6 +80,7 @@ class Vacancy(models.Model):
     contact_information = models.CharField(max_length=255)
     city = models.CharField(max_length=255)
     location = PlainLocationField(based_fields=['city'], zoom=7)
+    specialization = models.ForeignKey(SpecializationSubType, on_delete=models.CASCADE, related_name='specializations')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateField(auto_now=True)
 

@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'drf_yasg',
     'location_field.apps.DefaultConfig',
+    'django_filters',
 
     # apps
     'apps.product',

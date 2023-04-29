@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
 from apps.product.models import Vacancy, Company
@@ -47,12 +48,12 @@ class Like(models.Model):
         return f'{self.user}'
 
 
-class Comment(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comments')
-    vacancy = models.ForeignKey(Vacancy, on_delete=models.CASCADE, related_name='comments')
+class Review(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reviews')
+    vacancy = models.ForeignKey(Vacancy, on_delete=models.CASCADE, related_name='reviews')
+    rating = models.SmallIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)], blank=True)
     text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateField(auto_now=True)
 
     def __str__(self):
         return f'{self.user}'

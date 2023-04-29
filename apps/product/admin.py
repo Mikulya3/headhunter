@@ -1,9 +1,12 @@
 from django.contrib import admin
 
-from apps.product.models import Resume, Vacancy, Company
+from apps.product.models import Resume, Vacancy, Company, Specialization, SpecializationType, SpecializationSubType
 
 # Register your models here.
 
 admin.site.register(Resume)
 admin.site.register(Vacancy)
 admin.site.register(Company)
+admin.site.register(Specialization)
+admin.site.register(SpecializationType)
+admin.site.register(SpecializationSubType)

@@ -4,7 +4,7 @@ from django.urls import path, include
 
 router = DefaultRouter()
 router.register('resume', views.ResumeViewSet, basename='resume')
-router.register('job', views.VacancyViewSet, basename='vacancy')
+router.register('vacancy', views.VacancyViewSet, basename='vacancy')
 
 urlpatterns = [
     path('', include(router.urls)),

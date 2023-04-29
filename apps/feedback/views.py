@@ -2,11 +2,12 @@ from django.shortcuts import render
 from rest_framework import mixins, permissions
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
-from apps.feedback.mixins import LikeMixin, FavoriteMixin, VacancyUnwantedMixin, CompanyUnwantedMixin, SubscriptionMixin
-from apps.feedback.models import Like, Favorite, VacancyUnwanted, CompanyUnwanted, Subscription, Comment
+from apps.feedback.mixins import LikeMixin, FavoriteMixin, VacancyUnwantedMixin, CompanyUnwantedMixin, \
+    SubscriptionMixin, ReviewsMixin
+from apps.feedback.models import Like, Favorite, VacancyUnwanted, CompanyUnwanted, Subscription, Review
 from apps.feedback.permissions import IsFavoriteOwner
 from apps.feedback.serializers import LikeSerializer, FavoriteSerializer, UnwantedSerializer, CompanyUnwantedSerializer, \
-    SubscriptionSerializer, CommentSerializer
+    SubscriptionSerializer, ReviewSerializer
 
 
 class LikeAPIView(mixins.ListModelMixin, LikeMixin, GenericViewSet):
@@ -64,10 +65,13 @@ class SubscriptionAPIView(mixins.ListModelMixin, SubscriptionMixin, GenericViewS
         return queryset
 
 
-class CommentViewSet(ModelViewSet):
-    queryset = Comment.objects.all()
-    serializer_class = CommentSerializer
-    permission_classes = [IsFavoriteOwner]
+class ReviewAPIView(mixins.ListModelMixin, mixins.DestroyModelMixin, mixins.CreateModelMixin,
+                    ReviewsMixin, GenericViewSet):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        queryset = queryset.filter(user=self.request.user)
+        return queryset

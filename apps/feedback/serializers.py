@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from apps.feedback.models import Favorite, VacancyUnwanted, Like, CompanyUnwanted, Subscription, Comment
+from apps.feedback.models import Favorite, VacancyUnwanted, Like, CompanyUnwanted, Subscription, Review
 
 
 class FavoriteSerializer(serializers.ModelSerializer):
@@ -64,15 +64,16 @@ class CompanyUnwantedSerializer(serializers.ModelSerializer):
         return rep
 
 
-class CommentSerializer(serializers.ModelSerializer):
-    user = serializers.CharField(required=False)
+class ReviewSerializer(serializers.ModelSerializer):
+    rating = serializers.IntegerField(min_value=1, max_value=5)
+    vacancy = serializers.CharField(required=False)
+    text = serializers.CharField(required=True)
 
     class Meta:
-        model = Comment
-        fields = '__all__'
+        model = Review
+        fields = ['rating', 'vacancy', 'text']
 
     def to_representation(self, instance):
         rep = super().to_representation(instance)
         rep['vacancy'] = instance.vacancy.title
         return rep
-

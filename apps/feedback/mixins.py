@@ -1,7 +1,9 @@
+from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from apps.feedback.models import Like, Favorite, VacancyUnwanted, CompanyUnwanted, Subscription
+from apps.feedback.models import Like, Favorite, VacancyUnwanted, CompanyUnwanted, Subscription, Review
+from apps.feedback.serializers import ReviewSerializer
 
 
 class LikeMixin:
@@ -69,5 +71,13 @@ class CompanyUnwantedMixin:
         return Response({'msg': status_})
 
 
-
+class ReviewsMixin:
+    @action(detail=True, methods=['POST'])
+    def post(self, request, pk, *args, **kwargs):
+        serializer = ReviewSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        obj, _ = Review.objects.get_or_create(vacancy_id=pk, user=request.user)
+        obj.rating = request.data['rating']
+        obj.save()
+        return Response(request.data, status=status.HTTP_201_CREATED)
 
