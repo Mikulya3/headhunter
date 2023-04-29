@@ -40,6 +40,8 @@ urlpatterns = [
 
     path('account/', include('apps.accountify.urls')),
     path('profile/', include('apps.userprofile.urls')),
+    path('feedback/', include('apps.feedback.urls')),
+    path('', include('apps.product.urls')),
 ]
 
 urlpatterns += static(

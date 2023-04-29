@@ -46,11 +46,14 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'drf_yasg',
+    'location_field.apps.DefaultConfig',
+    'django_filters',
 
     # apps
-    # 'apps.product',
+    'apps.product',
     'apps.accountify',
     'apps.userprofile',
+    'apps.feedback',
 ]
 
 MIDDLEWARE = [
@@ -195,3 +198,11 @@ EMAIL_HOST_USER = config('EMAIL_HOST_USER')
 
 BROKER_URL = config('BROKER_URL')
 BROKER_TRANSPORT = config('BROKER_TRANSPORT')
+
+
+LOCATION_FIELD = {
+    'provider.google.api': '//maps.google.com/maps/api/js?sensor=false',
+    'provider.google.api_key': config('API_KEY'),
+    'provider.google.api_libraries': '',
+    'provider.google.map.type': 'ROADMAP',
+}

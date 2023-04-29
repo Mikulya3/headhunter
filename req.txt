@@ -8,3 +8,6 @@ psycopg2-binary
 drf-yasg
 django-cors-headers
 pillow
+django-birthday
+django-location-field
+django-filter
