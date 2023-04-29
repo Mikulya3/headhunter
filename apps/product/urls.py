@@ -7,5 +7,7 @@ router.register('resume', views.ResumeViewSet, basename='resume')
 router.register('vacancy', views.VacancyViewSet, basename='vacancy')
 
 urlpatterns = [
+    path('recommended/', views.RecommendationView.as_view(), name='recommends'),
     path('', include(router.urls)),
+
 ]

@@ -2,12 +2,13 @@ from django.shortcuts import render
 from rest_framework import mixins, permissions
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
-from apps.feedback.mixins import LikeMixin, FavoriteMixin, VacancyUnwantedMixin, CompanyUnwantedMixin, \
-    SubscriptionMixin, ReviewsMixin
-from apps.feedback.models import Like, Favorite, VacancyUnwanted, CompanyUnwanted, Subscription, Review
+from apps.feedback.mixins import LikeMixin, FavoriteMixin, \
+    SubscriptionMixin, ReviewsMixin, UnwantedVacancyMixin, UnwantedCompanyMixin, FavoriteSpecializationMixin
+from apps.feedback.models import Like, Favorite, UnwantedCompany, UnwantedVacancy, Subscription, Review, \
+    FavoriteSpecialization
 from apps.feedback.permissions import IsFavoriteOwner
 from apps.feedback.serializers import LikeSerializer, FavoriteSerializer, UnwantedSerializer, CompanyUnwantedSerializer, \
-    SubscriptionSerializer, ReviewSerializer
+    SubscriptionSerializer, ReviewSerializer, FavoriteSpecializationSerializer
 
 
 class LikeAPIView(mixins.ListModelMixin, LikeMixin, GenericViewSet):
@@ -32,8 +33,18 @@ class FavoriteAPIView(mixins.ListModelMixin,  FavoriteMixin, GenericViewSet):
         return queryset
 
 
-class UnwantedAPIView(mixins.ListModelMixin, VacancyUnwantedMixin, GenericViewSet):
-    queryset = VacancyUnwanted.objects.all()
+class FavoriteSpecializationAPIView(mixins.ListModelMixin, FavoriteSpecializationMixin, GenericViewSet):
+    queryset = FavoriteSpecialization.objects.all()
+    serializer_class = FavoriteSpecializationSerializer
+    permission_classes = [IsFavoriteOwner]
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        queryset = queryset.filter(user=self.request.user)
+        return queryset
+
+class UnwantedAPIView(mixins.ListModelMixin, UnwantedVacancyMixin, GenericViewSet):
+    queryset = UnwantedVacancy.objects.all()
     serializer_class = UnwantedSerializer
     permission_classes = [IsFavoriteOwner]
 
@@ -43,8 +54,8 @@ class UnwantedAPIView(mixins.ListModelMixin, VacancyUnwantedMixin, GenericViewSe
         return queryset
 
 
-class CompanyUnwantedAPIView(mixins.ListModelMixin, CompanyUnwantedMixin, GenericViewSet):
-    queryset = CompanyUnwanted.objects.all()
+class CompanyUnwantedAPIView(mixins.ListModelMixin, UnwantedCompanyMixin, GenericViewSet):
+    queryset = UnwantedCompany.objects.all()
     serializer_class = CompanyUnwantedSerializer
     permission_classes = [IsFavoriteOwner]
 

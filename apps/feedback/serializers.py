@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
-from apps.feedback.models import Favorite, VacancyUnwanted, Like, CompanyUnwanted, Subscription, Review
+from apps.feedback.models import Favorite, UnwantedVacancy, Like, UnwantedCompany, Subscription, Review, \
+    FavoriteSpecialization
 
 
 class FavoriteSerializer(serializers.ModelSerializer):
@@ -16,10 +17,23 @@ class FavoriteSerializer(serializers.ModelSerializer):
         return rep
 
 
+class FavoriteSpecializationSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = FavoriteSpecialization
+        fields = '__all__'
+
+    def to_representation(self, instance):
+        rep = super().to_representation(instance)
+        rep['user'] = instance.user.email
+        rep['specialization'] = instance.specialization.name
+        return rep
+
+
 class UnwantedSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = VacancyUnwanted
+        model = UnwantedVacancy
         fields = '__all__'
 
     def to_representation(self, instance):
@@ -55,7 +69,7 @@ class SubscriptionSerializer(serializers.ModelSerializer):
 class CompanyUnwantedSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = CompanyUnwanted
+        model = UnwantedCompany
         fields = '__all__'
 
     def to_representation(self, instance):
@@ -65,13 +79,14 @@ class CompanyUnwantedSerializer(serializers.ModelSerializer):
 
 
 class ReviewSerializer(serializers.ModelSerializer):
+    user = serializers.ReadOnlyField(source='user.first_name')
     rating = serializers.IntegerField(min_value=1, max_value=5)
     vacancy = serializers.CharField(required=False)
     text = serializers.CharField(required=True)
 
     class Meta:
         model = Review
-        fields = ['rating', 'vacancy', 'text']
+        fields = ['rating', 'vacancy', 'text', 'user']
 
     def to_representation(self, instance):
         rep = super().to_representation(instance)

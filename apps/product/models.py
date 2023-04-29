@@ -58,7 +58,7 @@ class SpecializationType(models.Model):
     keywords = models.TextField()
 
     def __str__(self):
-        return f'{self.specialization.name}: {self.name}'
+        return f'{self.name} ({self.specialization.name})'
 
 
 class SpecializationSubType(models.Model):
@@ -68,7 +68,7 @@ class SpecializationSubType(models.Model):
     keywords = models.TextField()
 
     def __str__(self):
-        return f'{self.specialization_type.specialization.name} > {self.specialization_type.name} > {self.name}'
+        return f'{self.name}: {self.specialization_type.name} ({self.specialization_type.specialization.name})'
 
 
 class Vacancy(models.Model):
@@ -81,6 +81,7 @@ class Vacancy(models.Model):
     city = models.CharField(max_length=255)
     location = PlainLocationField(based_fields=['city'], zoom=7)
     specialization = models.ForeignKey(SpecializationSubType, on_delete=models.CASCADE, related_name='specializations')
+    type_of_employment = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateField(auto_now=True)
 
@@ -89,3 +90,31 @@ class Vacancy(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class CompanyIndustry(models.Model):
+    name = models.CharField(max_length=128)
+    company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='industries')
+
+    def __str__(self):
+        return self.name
+
+
+class CompanyIndustryType(models.Model):
+    name = models.CharField(max_length=128)
+    industry = models.ForeignKey(CompanyIndustry, on_delete=models.CASCADE, related_name='types')
+
+    def __str__(self):
+        return f'{self.name}: {self.industry.name}'
+
+
+class CompanyIndustrySubType(models.Model):
+    name = models.CharField(max_length=128)
+    industry_type = models.ForeignKey(CompanyIndustryType, on_delete=models.CASCADE, related_name='subtypes')
+
+    def __str__(self):
+        return f'{self.name}: {self.industry_type.name} ({self.industry_type.industry.name})'
+
+
+
+

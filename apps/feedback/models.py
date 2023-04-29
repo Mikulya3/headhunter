@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
-from apps.product.models import Vacancy, Company
+from apps.product.models import Vacancy, Company, Specialization
 
 User = get_user_model()
 
@@ -15,7 +15,7 @@ class Favorite(models.Model):
         return f'{self.user}'
 
 
-class VacancyUnwanted(models.Model):
+class UnwantedVacancy(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='vc_unwanted')
     vacancy = models.ForeignKey(Vacancy, on_delete=models.CASCADE, related_name='vc_unwanted')
 
@@ -31,7 +31,7 @@ class Subscription(models.Model):
         return f'{self.user}'
 
 
-class CompanyUnwanted(models.Model):
+class UnwantedCompany(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='cm_unwanted')
     company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='cm_unwanted')
 
@@ -57,3 +57,12 @@ class Review(models.Model):
 
     def __str__(self):
         return f'{self.user}'
+
+
+class FavoriteSpecialization(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='favorites_sp')
+    specialization = models.ForeignKey(Specialization, on_delete=models.CASCADE, related_name='favorites_sp')
+
+    def __str__(self):
+        return f'{self.user}'
+

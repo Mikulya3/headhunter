@@ -2,7 +2,8 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from apps.feedback.models import Like, Favorite, VacancyUnwanted, CompanyUnwanted, Subscription, Review
+from apps.feedback.models import Like, Favorite, UnwantedVacancy, UnwantedCompany, Subscription, Review, \
+    FavoriteSpecialization
 from apps.feedback.serializers import ReviewSerializer
 
 
@@ -45,28 +46,41 @@ class FavoriteMixin:
         return Response({'msg': status_})
 
 
-class VacancyUnwantedMixin:
+class FavoriteSpecializationMixin:
     @action(detail=True, methods=['POST'])
     def post(self, request, pk, *args, **kwargs):
         try:
-            obj = VacancyUnwanted.objects.get(vacancy_id=pk, user=request.user)
+            obj = FavoriteSpecialization.objects.get(specialization_id=pk, user=request.user)
+            obj.delete()
+            status_ = 'Специализиция удалено из избранных'
+        except FavoriteSpecialization.DoesNotExist:
+            obj = FavoriteSpecialization.objects.create(specialization_id=pk, user=request.user)
+            status_ = 'Специализация добавлено в избранное'
+        return Response({'msg': status_})
+
+
+class UnwantedVacancyMixin:
+    @action(detail=True, methods=['POST'])
+    def post(self, request, pk, *args, **kwargs):
+        try:
+            obj = UnwantedVacancy.objects.get(vacancy_id=pk, user=request.user)
             obj.delete()
             status_ = 'Вакансия удалено из нежелательных'
-        except VacancyUnwanted.DoesNotExist:
-            obj = VacancyUnwanted.objects.create(vacancy_id=pk, user=request.user)
+        except UnwantedVacancy.DoesNotExist:
+            obj = UnwantedVacancy.objects.create(vacancy_id=pk, user=request.user)
             status_ = 'Вакансия добавлено в нежелательное'
         return Response({'msg': status_})
 
 
-class CompanyUnwantedMixin:
+class UnwantedCompanyMixin:
     @action(detail=True, methods=['POST'])
     def post(self, request, pk, *args, **kwargs):
         try:
-            obj = CompanyUnwanted.objects.get(company_id=pk, user=request.user)
+            obj = UnwantedCompany.objects.get(company_id=pk, user=request.user)
             obj.delete()
             status_ = 'Компания удалено из нежелательных'
-        except CompanyUnwanted.DoesNotExist:
-            obj = CompanyUnwanted.objects.create(company_id=pk, user=request.user)
+        except UnwantedCompany.DoesNotExist:
+            obj = UnwantedCompany.objects.create(company_id=pk, user=request.user)
             status_ = 'Компания добавлено в нежелательное'
         return Response({'msg': status_})
 

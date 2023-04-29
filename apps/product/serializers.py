@@ -1,6 +1,8 @@
+from django.db.models import Avg
 from rest_framework import serializers
 
-from apps.feedback.models import Like
+from apps.feedback.models import Like, Review
+from apps.feedback.serializers import ReviewSerializer
 from apps.product.models import Resume, Vacancy, Company
 
 
@@ -24,15 +26,20 @@ class VacancySerializer(serializers.ModelSerializer):
     class Meta:
         model = Vacancy
         fields = ('company', 'title', 'description', 'salary', 'location',
-                  'city', 'contact_information', 'specialization')
+                  'city', 'contact_information', 'specialization', 'type_of_employment')
 
     def to_representation(self, instance):
         rep = super().to_representation(instance)
         rep['likes'] = Like.objects.filter(vacancy=instance, like=True).count()
-        # reviews = Comment.objects.filter(vacancy=instance)
-        # reviews = CommentSerializer(reviews, many=True).data
-        # reviews = [{'user': i['user'], 'review': i['review']} for i in reviews]
-        # rep['reviews'] = reviews
+        reviews = Review.objects.filter(vacancy=instance)
+        reviews = ReviewSerializer(reviews, many=True).data
+        reviews = [{'user': i['user'], 'rating': i['rating'], 'text': i['text']} for i in reviews]
+        rep['reviews'] = reviews
+        rating = Review.objects.filter(vacancy=instance).aggregate(Avg('rating'))['rating__avg']
+        if rating:
+            rep['rating'] = rating
+        else:
+            rep['rating'] = 0
         return rep
 
 
