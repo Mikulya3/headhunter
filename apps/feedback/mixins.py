@@ -2,22 +2,8 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from apps.feedback.models import Like, Favorite, UnwantedVacancy, UnwantedCompany, Subscription, Review, \
-    FavoriteSpecialization
+from apps.feedback.models import Favorite, UnwantedVacancy, UnwantedCompany, Subscription, Review
 from apps.feedback.serializers import ReviewSerializer
-
-
-class LikeMixin:
-    @action(detail=True, methods=['POST'])
-    def post(self, request, pk, *args, **kwargs):
-        try:
-            obj = Like.objects.get(vacancy_id=pk, user=request.user)
-            obj.delete()
-            status_ = 'Unliked'
-        except Like.DoesNotExist:
-            obj = Like.objects.create(vacancy_id=pk, user=request.user)
-            status_ = 'Liked'
-        return Response({'msg': status_})
 
 
 class SubscriptionMixin:
@@ -43,19 +29,6 @@ class FavoriteMixin:
         except Favorite.DoesNotExist:
             obj = Favorite.objects.create(vacancy_id=pk, user=request.user)
             status_ = 'Добавлено в избранное'
-        return Response({'msg': status_})
-
-
-class FavoriteSpecializationMixin:
-    @action(detail=True, methods=['POST'])
-    def post(self, request, pk, *args, **kwargs):
-        try:
-            obj = FavoriteSpecialization.objects.get(specialization_id=pk, user=request.user)
-            obj.delete()
-            status_ = 'Специализиция удалено из избранных'
-        except FavoriteSpecialization.DoesNotExist:
-            obj = FavoriteSpecialization.objects.create(specialization_id=pk, user=request.user)
-            status_ = 'Специализация добавлено в избранное'
         return Response({'msg': status_})
 
 

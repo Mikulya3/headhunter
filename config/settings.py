@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'apps.accountify',
     'apps.userprofile',
     'apps.feedback',
+    'apps.catalog',
 ]
 
 MIDDLEWARE = [
