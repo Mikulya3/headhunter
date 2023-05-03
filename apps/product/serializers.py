@@ -1,9 +1,7 @@
-from django.db.models import Avg
 from rest_framework import serializers
 
-from apps.feedback.models import Like, Review
-from apps.feedback.serializers import ReviewSerializer
-from apps.product.models import Resume, Vacancy, Company
+from apps.catalog.models import Company, LanguageLevel, Language, LanguageSkill, Education
+from apps.product.models import Resume, Vacancy
 
 
 class ResumeSerializer(serializers.ModelSerializer):
@@ -19,28 +17,91 @@ class ResumeSerializer(serializers.ModelSerializer):
                   'summary', 'skills', 'experience', 'education', 'created_at', 'updated_at')
 
 
+class LanguageSkillSerializer(serializers.ModelSerializer):
+    language = serializers.CharField(source='language.language')
+    level = serializers.CharField(source='level.name')
+
+    class Meta:
+        model = LanguageSkill
+        fields = ('language', 'level')
+
+
+class EducationSerializer(serializers.ModelSerializer):
+    specialization = serializers.CharField(source='specialization.name')
+    institute = serializers.CharField(source='institute.name')
+
+    class Meta:
+        model = Education
+        fields = ('degree', 'year', 'specialization', 'institute')
+
+
+class ResumeListSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Resume
+        fields = ('title', 'work_experience', 'experience', 'employment_at_company', 'updated_at')
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        if instance.is_looking_for_job is not None:
+            ret['is_looking_for_job'] = instance.get_is_looking_for_job_display()
+        else:
+            del ret['is_looking_for_job']
+        return ret
+
+
+class ResumeDetailSerializer(serializers.ModelSerializer):
+    specialization = serializers.CharField(source='specialization.name')
+    skills = serializers.SerializerMethodField()
+    knowledge_of_languages = LanguageSkillSerializer(many=True, read_only=True)
+    education = EducationSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Resume
+        fields = ('gender', 'city', 'birthday', 'title', 'specialization', 'employment', 'schedule', 'work_experience',
+                  'skills', 'education', 'knowledge_of_languages')
+
+    def get_skills(self, obj):
+        return list(obj.skills.values_list('title', flat=True))
+
+
+class ResumeUpdateSerializer(serializers.ModelSerializer):
+    specialization = serializers.CharField(source='specialization.name')
+    skills = serializers.SerializerMethodField()
+    knowledge_of_languages = LanguageSkillSerializer(many=True, read_only=True)
+    education = EducationSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Resume
+        fields = '__all__'
+
+    def get_skills(self, obj):
+        return list(obj.skills.values_list('title', flat=True))
+
+
 class VacancySerializer(serializers.ModelSerializer):
     company = serializers.CharField(source='company.name')
+
+    class Meta:
+        model = Vacancy
+        fields = ('title', 'company', 'city', 'created_at')
+
+
+class VacancyDetailSerializer(serializers.ModelSerializer):
+    company = serializers.CharField(source='company.name')
+    skills = serializers.SerializerMethodField()
+    knowledge_of_languages = LanguageSkillSerializer(many=True, read_only=True)
     specialization = serializers.CharField(source='specialization.name')
 
     class Meta:
         model = Vacancy
-        fields = ('company', 'title', 'description', 'salary', 'location',
-                  'city', 'contact_information', 'specialization', 'type_of_employment')
+        fields = ('title', 'company', 'description', 'requirements', 'responsibilities', 'salary',
+                  'required_experience', 'contact_information', 'city', 'location', 'employment', 'specialization',
+                  'knowledge_of_languages', 'necessary_skills', 'skills', 'what_do_we_offer',
+                  'created_at', 'updated_at')
 
-    def to_representation(self, instance):
-        rep = super().to_representation(instance)
-        rep['likes'] = Like.objects.filter(vacancy=instance, like=True).count()
-        reviews = Review.objects.filter(vacancy=instance)
-        reviews = ReviewSerializer(reviews, many=True).data
-        reviews = [{'user': i['user'], 'rating': i['rating'], 'text': i['text']} for i in reviews]
-        rep['reviews'] = reviews
-        rating = Review.objects.filter(vacancy=instance).aggregate(Avg('rating'))['rating__avg']
-        if rating:
-            rep['rating'] = rating
-        else:
-            rep['rating'] = 0
-        return rep
+    def get_skills(self, obj):
+        return list(obj.skills.values_list('title', flat=True))
 
 
 class CompanySerializer(serializers.ModelSerializer):
@@ -48,3 +109,5 @@ class CompanySerializer(serializers.ModelSerializer):
     class Meta:
         model = Company
         fields = ('name', 'logo', 'description', 'location', 'website')
+
+

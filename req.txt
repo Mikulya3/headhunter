@@ -11,3 +11,4 @@ pillow
 django-birthday
 django-location-field
 django-filter
+
