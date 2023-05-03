@@ -15,6 +15,9 @@ urlpatterns = [
     path('vacancies/delete/<int:id>', views.VacancyDeleteAPIView.as_view(), name='vacancy-delete'),
     path('resume/', views.ResumeListAPIView.as_view(), name='resume'),
     path('resume/<int:id>/', views.ResumeDetailAPIView.as_view(), name='resume-detail'),
+    path('resume/update/<int:pk>', views.ResumeUpdateAPIView.as_view(), name='resume-update'),
+    path('resume/delete/<int:pk>', views.ResumeDeleteAPIView.as_view(), name='resume-delete'),
+    path('companies/', views.CompanyListAPIView.as_view(), name='companies-list'),
 
 
     path('', include(router.urls)),

@@ -2,6 +2,8 @@ from django.db import models
 
 from location_field.models.plain import PlainLocationField
 
+# from apps.product.models import Vacancy
+
 
 class Company(models.Model):
     name = models.CharField(max_length=255)

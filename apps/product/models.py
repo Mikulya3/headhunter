@@ -3,12 +3,11 @@ from django.db import models
 from birthday import BirthdayField
 from location_field.models.plain import PlainLocationField
 
-from apps.catalog.models import SpecializationSubType, Skill, EmploymentAtCompany, Experience, Language, Company, \
-    Education, LanguageSkill, NativeLanguage
+from apps.catalog.models import SpecializationSubType, Skill, EmploymentAtCompany, Experience, Language, \
+    Education, LanguageSkill, NativeLanguage, Company
 
 # Create your models here.
 User = get_user_model()
-
 
 TypeofEmployment = (
     ('full-time', 'полная занятость'),
@@ -39,6 +38,14 @@ IS_LOOKING_FOR_JOB_CHOICES = (
 GENDER = (
     ('male', 'Мужской'),
     ('female', 'Женский')
+)
+
+REQUIRED_EXPERIENCE = (
+    ('no_experience', 'Без опыта'),
+    ('less_than_1_year', 'Менее 1 года'),
+    ('1_3_years', '1-3 года'),
+    ('3_6_years', '3-6 лет'),
+    ('more_than_6_years', 'Более 6 лет')
 )
 
 
@@ -82,13 +89,18 @@ class Vacancy(models.Model):
     company = models.ForeignKey(Company, on_delete=models.CASCADE, related_name='companies')
     description = models.TextField(blank=True, null=True)
     requirements = models.TextField(blank=True, null=True)
+    responsibilities = models.TextField(blank=True, null=True)
     salary = models.CharField(null=True, blank=True)
+    required_experience = models.CharField(choices=REQUIRED_EXPERIENCE, max_length=100)
     contact_information = models.CharField(max_length=255)
     city = models.CharField(max_length=255)
     location = PlainLocationField(based_fields=['city'], zoom=7)
     specialization = models.ForeignKey(SpecializationSubType, on_delete=models.CASCADE, related_name='specializations')
     employment = models.CharField(choices=TypeofEmployment, max_length=128)
-    knowledge_of_languages = models.ForeignKey(Language, on_delete=models.CASCADE, related_name='vacancy_languages')
+    knowledge_of_languages = models.ManyToManyField(LanguageSkill, blank=True)
+    necessary_skills = models.CharField(max_length=512, blank=True, null=True)
+    skills = models.ManyToManyField(Skill, blank=True)
+    what_do_we_offer = models.CharField(max_length=512)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateField(auto_now=True)
 

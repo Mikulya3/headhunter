@@ -17,13 +17,6 @@ class ResumeSerializer(serializers.ModelSerializer):
                   'summary', 'skills', 'experience', 'education', 'created_at', 'updated_at')
 
 
-# class LanguageSkillSerializer(serializers.ModelSerializer):
-#     language = serializers.CharField(source='language.language')
-#     level = serializers.CharField(source='level.name')
-#
-#     class Meta:
-#         model = LanguageSkill
-#         fields = ('language', 'level')
 class LanguageSkillSerializer(serializers.ModelSerializer):
     language = serializers.CharField(source='language.language')
     level = serializers.CharField(source='level.name')
@@ -72,11 +65,18 @@ class ResumeDetailSerializer(serializers.ModelSerializer):
         return list(obj.skills.values_list('title', flat=True))
 
 
-class CompanySerializer(serializers.ModelSerializer):
+class ResumeUpdateSerializer(serializers.ModelSerializer):
+    specialization = serializers.CharField(source='specialization.name')
+    skills = serializers.SerializerMethodField()
+    knowledge_of_languages = LanguageSkillSerializer(many=True, read_only=True)
+    education = EducationSerializer(many=True, read_only=True)
 
     class Meta:
-        model = Company
-        fields = ('name', 'logo', 'description', 'location', 'website')
+        model = Resume
+        fields = '__all__'
+
+    def get_skills(self, obj):
+        return list(obj.skills.values_list('title', flat=True))
 
 
 class VacancySerializer(serializers.ModelSerializer):
@@ -89,9 +89,25 @@ class VacancySerializer(serializers.ModelSerializer):
 
 class VacancyDetailSerializer(serializers.ModelSerializer):
     company = serializers.CharField(source='company.name')
+    skills = serializers.SerializerMethodField()
+    knowledge_of_languages = LanguageSkillSerializer(many=True, read_only=True)
+    specialization = serializers.CharField(source='specialization.name')
 
     class Meta:
         model = Vacancy
-        fields = '__all__'
+        fields = ('title', 'company', 'description', 'requirements', 'responsibilities', 'salary',
+                  'required_experience', 'contact_information', 'city', 'location', 'employment', 'specialization',
+                  'knowledge_of_languages', 'necessary_skills', 'skills', 'what_do_we_offer',
+                  'created_at', 'updated_at')
+
+    def get_skills(self, obj):
+        return list(obj.skills.values_list('title', flat=True))
+
+
+class CompanySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Company
+        fields = ('name', 'logo', 'description', 'location', 'website')
 
 

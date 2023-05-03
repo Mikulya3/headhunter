@@ -6,16 +6,14 @@ from django.db.models import Q
 from django.shortcuts import render
 from django_filters import ModelMultipleChoiceFilter
 from rest_framework import permissions, generics
-from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.viewsets import ModelViewSet
 
-from apps.catalog.models import CompanyIndustrySubType
+from apps.catalog.models import SpecializationSubType, CompanyIndustrySubType, Company
 from apps.feedback.models import Favorite, UnwantedCompany, UnwantedVacancy
-from apps.product.models import Resume, Vacancy,  SpecializationSubType
-from apps.product.serializers import ResumeSerializer, VacancySerializer, VacancyDetailSerializer, ResumeListSerializer, \
-    ResumeDetailSerializer
+from apps.product.models import Vacancy, Resume
+from apps.product.serializers import ResumeSerializer, VacancySerializer, VacancyDetailSerializer,\
+    ResumeListSerializer, ResumeDetailSerializer, ResumeUpdateSerializer, CompanySerializer
 from rest_framework.filters import OrderingFilter, SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.pagination import PageNumberPagination
@@ -72,6 +70,11 @@ class VacancyUpdateAPIView(generics.UpdateAPIView):
     queryset = Vacancy.objects.all()
     serializer_class = VacancyDetailSerializer
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        queryset = queryset.filter(user=self.request.user)
+        return queryset
+
 
 class VacancyDeleteAPIView(generics.DestroyAPIView):
     queryset = Vacancy.objects.all()
@@ -81,6 +84,7 @@ class VacancyDeleteAPIView(generics.DestroyAPIView):
 class ResumeListAPIView(generics.ListAPIView):
     queryset = Resume.objects.all()
     serializer_class = ResumeListSerializer
+    pagination_class = LargeResultsSetPagination
 
 
 class ResumeDetailAPIView(generics.RetrieveAPIView):
@@ -93,6 +97,27 @@ class ResumeCreateAPIView(generics.CreateAPIView):
     queryset = Resume.objects.all()
     serializer_class = ResumeSerializer
     # permission_classes = [permissions.IsAuthenticated]
+
+
+class ResumeUpdateAPIView(generics.UpdateAPIView):
+    queryset = Resume.objects.all()
+    serializer_class = ResumeUpdateSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        queryset = queryset.filter(user=self.request.user)
+        return queryset
+
+
+class ResumeDeleteAPIView(generics.DestroyAPIView):
+    queryset = Resume.objects.all()
+    serializer_class = ResumeUpdateSerializer
+
+
+class CompanyListAPIView(generics.ListAPIView):
+    queryset = Company.objects.all()
+    serializer_class = CompanySerializer
 
 
 class RecommendationView(APIView):

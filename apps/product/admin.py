@@ -5,6 +5,10 @@ from apps.catalog.models import Specialization, SpecializationType, Specializati
     EmploymentAtCompany, Experience, Education, Institute, NativeLanguage
 from apps.product.models import Resume, Vacancy
 
+# from apps.product.models import Resume, Vacancy, Company, Specialization, SpecializationType, SpecializationSubType, \
+#     CompanyIndustry, CompanyIndustryType, CompanyIndustrySubType, Language, LanguageLevel, LanguageSkill, Skill, \
+#     Experience, EmploymentAtCompany, Education, Institute, NativeLanguage
+
 # Register your models here.
 
 admin.site.register(Resume)
