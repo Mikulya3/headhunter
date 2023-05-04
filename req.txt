@@ -1,4 +1,4 @@
-django
+django==4.0.1
 djangorestframework
 celery[redis]
 python-decouple
@@ -11,3 +11,8 @@ pillow
 django-birthday
 django-location-field
 django-filter
+channels==3.0.4
+asgi_redis
+daphne
+channels_redis
+
