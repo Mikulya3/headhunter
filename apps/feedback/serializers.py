@@ -1,7 +1,6 @@
 from rest_framework import serializers
 
-from apps.feedback.models import Favorite, UnwantedVacancy, Like, UnwantedCompany, Subscription, Review, \
-    FavoriteSpecialization
+from apps.feedback.models import Favorite, UnwantedVacancy, UnwantedCompany, Subscription, Review
 
 
 class FavoriteSerializer(serializers.ModelSerializer):
@@ -17,18 +16,6 @@ class FavoriteSerializer(serializers.ModelSerializer):
         return rep
 
 
-class FavoriteSpecializationSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = FavoriteSpecialization
-        fields = '__all__'
-
-    def to_representation(self, instance):
-        rep = super().to_representation(instance)
-        rep['user'] = instance.user.email
-        rep['specialization'] = instance.specialization.name
-        return rep
-
 
 class UnwantedSerializer(serializers.ModelSerializer):
 
@@ -40,18 +27,6 @@ class UnwantedSerializer(serializers.ModelSerializer):
         rep = super().to_representation(instance)
         rep['user'] = instance.user.first_name
         rep['vacancy'] = instance.vacancy.title
-
-
-class LikeSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Like
-        fields = '__all__'
-
-    def to_representation(self, instance):
-        rep = super().to_representation(instance)
-        rep['vacancy'] = instance.vacancy.title
-        return rep
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):
