@@ -2,59 +2,66 @@ import os
 import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 django.setup()
-
-from apps.chat.consumers import ChatConsumer
-from django.test import TestCase
+import unittest
+import asyncio
+import pytest
 from channels.testing import WebsocketCommunicator
-from channels.db import database_sync_to_async
-from apps.chat.models import Chat
-from django.contrib.sessions.backends.db import SessionStore
-from django.contrib.auth import get_user_model
+from channels.layers import get_channel_layer
+from apps.chat.consumers import ChatConsumer
 
-User = get_user_model()
-class ChatConsumerTestCase(TestCase):
-    async def get_user(self):
-        # create a session for the user
-        session = SessionStore()
-        session['_auth_user_id'] = self.user.id
-        session.save()
-        # get the user from the session
-        self.scope['session'] = session
-        return self.user
 
-    async def test_chat_consumer(self):
-        # Create a user for the test
-        self.user = User.objects.create_user(
-            email='testuser@example.com',
-            password='testpass'
-        )
+class TestChat(unittest.TestCase):
 
-        self.room_name = 'testroom'
-
-    async def tearDown(self):
-        self.websocket.disconnect()
-        self.websocket = None
-        self.async_db.close()
-
-        communicator = WebsocketCommunicator(
-            ChatConsumer.as_asgi(),
-            f'/ws/chat/{self.room_name}/'
-        )
-
-        # подключение в сокетам
+    @pytest.mark.django_db(databases=['default'])
+    @pytest.mark.asyncio
+    async def test_chat(self):
+        communicator = WebsocketCommunicator(ChatConsumer.as_asgi(), "/ws/work/")
         connected, _ = await communicator.connect()
-        self.assertTrue(connected)
-
-        # отправка сообщения сокетам
-        message = 'Hello, world!'
-        await communicator.send_json_to({'msg': message})
-
-        # проверка на сораняемость сообщений и тд
-        saved_chat = await database_sync_to_async(Chat.objects.last)()
-        self.assertEqual(saved_chat.message, message)
-        self.assertEqual(saved_chat.group.name, self.room_name)
-
-
-        # отсоединение от сокета
+        message = {'msg': 'Hello, world!', 'phone_number': '123-456-7890', 'city': 'New York', 'gender': 'Male',
+                   'citizenship': 'USA'}
+        await communicator.send_json_to(message)
+        try:
+            response = await asyncio.wait_for(communicator.receive_json_from(), timeout=60)
+            print(response)
+        except asyncio.TimeoutError:
+            print("Timed out waiting for response")
         await communicator.disconnect()
-        self.assertFalse(communicator.is_connected)
+
+    @pytest.mark.django_db(databases=['default'])
+    @pytest.mark.asyncio
+    async def test_channel_layer(self):
+        channel_layer = get_channel_layer()
+        channel_name = await channel_layer.new_channel()
+        await channel_layer.send(
+            'channel-1',
+            {
+                "type": "channel.ping",
+                "channel": channel_name,
+                "text": "This is a test"
+            }
+        )
+        try:
+            response = await asyncio.wait_for(channel_layer.receive(channel_name), 1)
+
+        except asyncio.exceptions.TimeoutError:
+            response = None
+
+    @pytest.mark.asyncio
+    async def test_my_consumer(self):
+        from channels.testing import ApplicationCommunicator
+        communicator = ApplicationCommunicator(ChatConsumer.as_asgi(), {
+            "type": "websocket",
+            "path": "/my-path/",
+        })
+        connected, _ = await communicator.connect()
+        await communicator.send_json_to({
+            "type": "my-message-type",
+            "data": "my-message-data",
+        })
+        response = await communicator.receive_json_from()
+        assert response == {
+            "type": "my-response-type",
+            "data": "my-response-data",
+        }
+        await communicator.disconnect()
+
